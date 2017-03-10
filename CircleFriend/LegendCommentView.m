@@ -7,15 +7,39 @@
 //
 
 #import "LegendCommentView.h"
+@interface LegendCommentView()<UITableViewDelegate,UITableViewDataSource>
+
+@end
 
 @implementation LegendCommentView
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
+- (instancetype)initWithFrame:(CGRect)frame{
+    
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithRed:245 green:246 blue:247 alpha:1];
+        
+        self.delegate = self;
+        self.dataSource = self;
+    }
+    
+    return self;
 }
-*/
+
+- (NSInteger)numberOfSections{
+    return 1;
+}
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    UITableViewCell *cell = [UITableViewCell alloc];
+    
+    
+    return cell;
+}
 
 @end
