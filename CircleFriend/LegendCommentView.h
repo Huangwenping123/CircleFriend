@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "CircleFriendModel.h"
 @interface LegendCommentView : UITableView
-
+@property (nonatomic, copy) NSArray <CommentModel*>*comentArray;
 @end

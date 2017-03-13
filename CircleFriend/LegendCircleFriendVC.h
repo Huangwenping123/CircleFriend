@@ -1,5 +1,5 @@
 //
-//  CircleFriendVC.h
+//  LegendCircleFriendVC.h
 //  CircleFriend
 //
 //  Created by sishengxiu on 17/3/7.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CircleFriendVC : UITableViewController
+@interface LegendCircleFriendVC : UITableViewController
 
 @end

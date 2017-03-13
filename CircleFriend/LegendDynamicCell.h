@@ -9,8 +9,15 @@
 #import <UIKit/UIKit.h>
 #import "CircleFriendModel.h"
 
-@interface DynamicCell : UITableViewCell
+@interface LegendDynamicCell : UITableViewCell
+
+
+
+/**
+ 朋友圈数据模型
+ */
 @property (nonatomic, strong) CircleFriendModel *model;
+
 //回调
 /**查看新消息*/
 @property  (nonatomic, copy) void (^lookNewMessage)();
@@ -27,4 +34,8 @@
 
 @property (nonatomic, copy) void (^showMore)(BOOL isOpen);
 
+@property (nonatomic, copy) void (^enterPersonHome)(NSString *userId);
 @end
+
+
+

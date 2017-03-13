@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "CircleFriendVC.h"
+#import "LegendCircleFriendVC.h"
 #import "LegendAttentionVC.h"
 @interface AppDelegate ()
 

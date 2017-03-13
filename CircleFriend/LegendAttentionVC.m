@@ -8,7 +8,7 @@
 
 #import "LegendAttentionVC.h"
 #import "LegendAttentionCell.h"
-#import "CircleFriendVC.h"
+#import "LegendCircleFriendVC.h"
 @interface LegendAttentionVC ()<UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic, strong) UITableView *tableView;
 @end
@@ -89,7 +89,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.section == 0) {
         if (indexPath.row == 0) {
-            CircleFriendVC *circleVC = [[CircleFriendVC alloc] init];
+            LegendCircleFriendVC *circleVC = [[LegendCircleFriendVC alloc] init];
             [self.navigationController pushViewController:circleVC animated:YES];
         }
     }

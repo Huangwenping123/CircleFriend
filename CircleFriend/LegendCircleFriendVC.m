@@ -6,20 +6,20 @@
 //  Copyright © 2017年 司胜修. All rights reserved.
 // 动态主界面
 
-#import "CircleFriendVC.h"
-#import "DynamicCell.h"
+#import "LegendCircleFriendVC.h"
+#import "LegendDynamicCell.h"
 #import "CircleFriendModel.h"
 #import "UITableView+FDTemplateLayoutCell.h"
 #import "LegendDyHeadView.h"
 
-@interface CircleFriendVC ()
+@interface LegendCircleFriendVC ()
 {
     NSMutableArray *dataArray;
 }
 @property (nonatomic, strong) LegendDyHeadView *headView;
 @end
 
-@implementation CircleFriendVC
+@implementation LegendCircleFriendVC
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -27,7 +27,7 @@
     self.navigationItem.title = @"朋友圈";
     
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [self.tableView registerClass:[DynamicCell class] forCellReuseIdentifier:@"dycell"];
+    [self.tableView registerClass:[LegendDynamicCell class] forCellReuseIdentifier:@"dycell"];
     self.tableView.tableHeaderView = self.headView;
     UIButton *changeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     changeBtn.frame = CGRectMake(0, 0, 40, 40);
@@ -106,7 +106,7 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    DynamicCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dycell" forIndexPath:indexPath];
+    LegendDynamicCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dycell" forIndexPath:indexPath];
     
     __block CircleFriendModel *model = dataArray[indexPath.row];
     cell.model = model;
@@ -144,14 +144,14 @@
 
 - (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     
-    CGFloat height = [self.tableView fd_heightForCellWithIdentifier:@"dycell" configuration:^(DynamicCell *cell) {
+    CGFloat height = [self.tableView fd_heightForCellWithIdentifier:@"dycell" configuration:^(LegendDynamicCell *cell) {
         [self configureOriCell:cell atIndexPath:indexPath];
     }];
     NSLog(@"%g======",height);
     return height;
 }
 
-- (void)configureOriCell:(DynamicCell *)cell atIndexPath:(NSIndexPath *)indexPath{
+- (void)configureOriCell:(LegendDynamicCell *)cell atIndexPath:(NSIndexPath *)indexPath{
     cell.fd_enforceFrameLayout = NO;
     if (indexPath.row<dataArray.count) {
         cell.model = dataArray[indexPath.row];

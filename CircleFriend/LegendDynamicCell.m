@@ -1,16 +1,17 @@
 //
-//  DynamicCell.m
+//  LegendDynamicCell.m
 //  CircleFriend
 //
 //  Created by sishengxiu on 17/3/7.
 //  Copyright © 2017年 司胜修. All rights reserved.
 //
 
-#import "DynamicCell.h"
+#import "LegendDynamicCell.h"
 #import "Masonry.h"
 #import "DyPhotoView.h"
 #import "UIImageView+WebCache.h"
-@interface DynamicCell()
+#import "LegendCommentView.h"
+@interface LegendDynamicCell()
 {
     CGFloat cellContentWidth;//cell内容宽度
     CGFloat dyTextMaxHeight;
@@ -26,11 +27,12 @@
 @property (nonatomic, strong) UIButton *collecteBtn;//收藏
 @property (nonatomic, strong) UIButton *commentBtn;//评论
 @property (nonatomic, strong) UIButton *moreBtn;//更多
-
+@property (nonatomic, strong) UIButton *locationBtn;//位置
+@property (nonatomic, strong) LegendCommentView *comentView;
 @property (nonatomic, strong) UIView *lineview;
 
 @end
-@implementation DynamicCell
+@implementation LegendDynamicCell
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
     
@@ -48,6 +50,9 @@
     
     self.headIco = [[UIImageView alloc] init];
     self.headIco.backgroundColor = [UIColor lightGrayColor];
+    self.headIco.userInteractionEnabled = YES;
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(headIcoClick)];
+    [self.headIco addGestureRecognizer:tap];
     [self.contentView addSubview:self.headIco];
     
     self.nameLabel = [[UILabel alloc] init];
@@ -71,7 +76,11 @@
     [self.moreBtn addTarget:self action:@selector(showMoreText) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:self.moreBtn];
     
-    
+    self.locationBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.locationBtn setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
+    self.locationBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+    self.locationBtn.hidden = YES;
+    [self.contentView addSubview:self.locationBtn];
     
     self.timeLabel = [[UILabel alloc] init];
     self.timeLabel.textColor = [UIColor grayColor];
@@ -96,10 +105,16 @@
     [self.collecteBtn setImage:[UIImage imageNamed:@"workgroup_img_like_sel"] forState:UIControlStateSelected];
     [self.contentView addSubview:self.collecteBtn];
     
+    
+    
     self.commentBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [self.commentBtn setImage:[UIImage imageNamed:@"workgroup_img_comment"] forState:UIControlStateNormal];
     [self.commentBtn addTarget:self action:@selector(comentClick) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:self.commentBtn];
+    
+    self.comentView = [[LegendCommentView alloc] init];
+    [self.contentView addSubview:self.comentView];
+    
     
     self.lineview = [[UIView alloc] init];
     self.lineview.backgroundColor = [UIColor lightGrayColor];
@@ -140,17 +155,22 @@
     }];
     [self.photoView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.dyText.mas_left);
-        make.top.equalTo(self.moreBtn.mas_bottom).offset(5);
+        make.top.equalTo(self.moreBtn.mas_bottom);
         make.height.offset(CGFLOAT_MIN);
         make.right.equalTo(self.dyText).offset(-15);
-        make.bottom.equalTo(self.timeLabel.mas_top).offset(-5);
+        make.bottom.equalTo(self.locationBtn.mas_top);
     }];
 
+    [self.locationBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.photoView);
+        make.top.equalTo(self.photoView.mas_bottom);
+        make.height.offset(CGFLOAT_MIN);
+    }];
+    
     [self.timeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-       
-        make.bottom.equalTo(self.lineview.mas_bottom).offset(-5);
+        make.top.equalTo(self.locationBtn.mas_bottom);
+        make.bottom.equalTo(self.comentView.mas_bottom);
         make.left.equalTo(self.dyText);
-        
     }];
     
     [self.deleteBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -172,7 +192,6 @@
         make.right.equalTo(self.commentBtn.mas_left).offset(-8);
         make.centerY.equalTo(self.timeLabel);
         make.size.sizeOffset(CGSizeMake(30, 30));
-
     }];
     
     [self.commentBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -180,8 +199,14 @@
         make.right.equalTo(self.contentView).offset(-15);
         make.centerY.equalTo(self.timeLabel);
         make.size.sizeOffset(CGSizeMake(30, 30));
-
-        
+    }];
+    
+    [self.comentView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.timeLabel.mas_bottom);
+        make.left.equalTo(self.timeLabel);
+        make.right.equalTo(self.commentBtn.mas_right);
+        make.bottom.equalTo(self.lineview.mas_top).offset(5);
+        make.height.offset(80);
     }];
     
     [self.lineview mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -196,7 +221,7 @@
 }
 
 /**
- 装在cell数据
+装载cell数据
 
  @param model 数据模型
  */
@@ -262,10 +287,21 @@
         self.photoView.picUrlArray = model.thumbnailPicUrls;
         self.photoView.picOriArray = model.originalPicUrls;
     }
+    self.locationBtn.hidden = NO;
+    [self.locationBtn setTitle:@"南京 南京理工大学" forState:(UIControlStateNormal)];
+    [self.locationBtn mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.height.offset(25);
+    }];
 }
 
 
-
+/**
+ 时间格式化
+ 
+ @param thisDate 消息对应的时间
+ 
+ @return 转化后的时间字符串
+ */
 - (NSString *)timeTransform:(NSDate *)thisDate{
 
     NSString *timeStr;
@@ -299,7 +335,16 @@
     }
     return timeStr;
 }
+
 #pragma mark - 按钮点击方法
+
+- (void)headIcoClick{
+    
+    if (self.enterPersonHome) {
+        self.enterPersonHome(self.model.userID);
+    }
+}
+
 - (void)showMoreText{
     
     self.moreBtn.selected = !self.moreBtn.selected;

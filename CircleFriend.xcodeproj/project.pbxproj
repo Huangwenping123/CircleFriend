@@ -14,8 +14,8 @@
 		1173107B1E6E5AC600C704EB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 117310791E6E5AC600C704EB /* LaunchScreen.storyboard */; };
 		117310861E6E5AC700C704EB /* CircleFriendTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 117310851E6E5AC700C704EB /* CircleFriendTests.m */; };
 		117310911E6E5AC700C704EB /* CircleFriendUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 117310901E6E5AC700C704EB /* CircleFriendUITests.m */; };
-		117310A01E6E5B0A00C704EB /* CircleFriendVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 1173109F1E6E5B0A00C704EB /* CircleFriendVC.m */; };
-		117310A31E6E5B4100C704EB /* DynamicCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 117310A21E6E5B4100C704EB /* DynamicCell.m */; };
+		117310A01E6E5B0A00C704EB /* LegendCircleFriendVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 1173109F1E6E5B0A00C704EB /* LegendCircleFriendVC.m */; };
+		117310A31E6E5B4100C704EB /* LegendDynamicCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 117310A21E6E5B4100C704EB /* LegendDynamicCell.m */; };
 		117310A61E6E5BED00C704EB /* DyPhotoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 117310A51E6E5BED00C704EB /* DyPhotoView.m */; };
 		117310E31E6E87B500C704EB /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 117310C91E6E87B500C704EB /* Info.plist */; };
 		117310E41E6E87B500C704EB /* MASCompositeConstraint.m in Sources */ = {isa = PBXBuildFile; fileRef = 117310CB1E6E87B500C704EB /* MASCompositeConstraint.m */; };
@@ -101,10 +101,10 @@
 		1173108C1E6E5AC700C704EB /* CircleFriendUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CircleFriendUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		117310901E6E5AC700C704EB /* CircleFriendUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CircleFriendUITests.m; sourceTree = "<group>"; };
 		117310921E6E5AC700C704EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1173109E1E6E5B0A00C704EB /* CircleFriendVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleFriendVC.h; sourceTree = "<group>"; };
-		1173109F1E6E5B0A00C704EB /* CircleFriendVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleFriendVC.m; sourceTree = "<group>"; };
-		117310A11E6E5B4100C704EB /* DynamicCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DynamicCell.h; sourceTree = "<group>"; };
-		117310A21E6E5B4100C704EB /* DynamicCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DynamicCell.m; sourceTree = "<group>"; };
+		1173109E1E6E5B0A00C704EB /* LegendCircleFriendVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LegendCircleFriendVC.h; sourceTree = "<group>"; };
+		1173109F1E6E5B0A00C704EB /* LegendCircleFriendVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LegendCircleFriendVC.m; sourceTree = "<group>"; };
+		117310A11E6E5B4100C704EB /* LegendDynamicCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LegendDynamicCell.h; sourceTree = "<group>"; };
+		117310A21E6E5B4100C704EB /* LegendDynamicCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LegendDynamicCell.m; sourceTree = "<group>"; };
 		117310A41E6E5BED00C704EB /* DyPhotoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DyPhotoView.h; sourceTree = "<group>"; };
 		117310A51E6E5BED00C704EB /* DyPhotoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DyPhotoView.m; sourceTree = "<group>"; };
 		117310C91E6E87B500C704EB /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -348,8 +348,8 @@
 				11F2A3881E70FD8200D8CC23 /* LegendAttentionCell.m */,
 				117311301E6FE73100C704EB /* YHActionSheet.h */,
 				117311311E6FE73100C704EB /* YHActionSheet.m */,
-				117310A11E6E5B4100C704EB /* DynamicCell.h */,
-				117310A21E6E5B4100C704EB /* DynamicCell.m */,
+				117310A11E6E5B4100C704EB /* LegendDynamicCell.h */,
+				117310A21E6E5B4100C704EB /* LegendDynamicCell.m */,
 				117310A41E6E5BED00C704EB /* DyPhotoView.h */,
 				117310A51E6E5BED00C704EB /* DyPhotoView.m */,
 				11D5F7951E7152A600E32D4E /* LegendDyHeadView.h */,
@@ -480,8 +480,8 @@
 			children = (
 				11F2A3821E70FC4000D8CC23 /* LegendAttentionVC.h */,
 				11F2A3831E70FC4000D8CC23 /* LegendAttentionVC.m */,
-				1173109E1E6E5B0A00C704EB /* CircleFriendVC.h */,
-				1173109F1E6E5B0A00C704EB /* CircleFriendVC.m */,
+				1173109E1E6E5B0A00C704EB /* LegendCircleFriendVC.h */,
+				1173109F1E6E5B0A00C704EB /* LegendCircleFriendVC.m */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -548,6 +548,7 @@
 		117310601E6E5AC600C704EB /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = Legend;
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "司胜修";
 				TargetAttributes = {
@@ -623,7 +624,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				117310E51E6E87B500C704EB /* MASConstraint.m in Sources */,
-				117310A01E6E5B0A00C704EB /* CircleFriendVC.m in Sources */,
+				117310A01E6E5B0A00C704EB /* LegendCircleFriendVC.m in Sources */,
 				1173112B1E6FD28100C704EB /* SDPhotoBrowser.m in Sources */,
 				11D5F7A21E72A71F00E32D4E /* LegendCommentView.m in Sources */,
 				11D5F78E1E71526300E32D4E /* SDWebImagePrefetcher.m in Sources */,
@@ -638,7 +639,7 @@
 				11D5F78D1E71526300E32D4E /* SDWebImageManager.m in Sources */,
 				11D5F7901E71526300E32D4E /* UIImage+GIF.m in Sources */,
 				1173112C1E6FD28100C704EB /* SDWaitingView.m in Sources */,
-				117310A31E6E5B4100C704EB /* DynamicCell.m in Sources */,
+				117310A31E6E5B4100C704EB /* LegendDynamicCell.m in Sources */,
 				11D5F78F1E71526300E32D4E /* UIButton+WebCache.m in Sources */,
 				11D5F78C1E71526300E32D4E /* SDWebImageDownloaderOperation.m in Sources */,
 				117310E41E6E87B500C704EB /* MASCompositeConstraint.m in Sources */,
