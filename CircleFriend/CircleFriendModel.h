@@ -42,7 +42,9 @@
 @interface CommentModel : NSObject
 
 @property (nonatomic, copy) NSString *userID;
-@property (nonatomic, copy) NSString *userName;
+@property (nonatomic, copy) NSString *commentId;
+@property (nonatomic, copy) NSString *commentName;
+@property (nonatomic, assign) BOOL isAnswer;
 @property (nonatomic, copy) NSString *commentText;
 
 @property (nonatomic, copy) NSString *answerUserID;

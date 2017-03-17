@@ -1,0 +1,111 @@
+//
+//  X_PhotoBrowser.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/21.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_PhotoBrowser.h"
+
+#import "MWCommon.h"
+#import "MWPhotoBrowser.h"
+
+@interface X_PhotoBrowser () <MWPhotoBrowserDelegate>
+
+
+@end
+
+@implementation X_PhotoBrowser {
+    NSMutableArray *_imageList;
+}
+
++ (X_PhotoBrowser *)sharedInstance {
+    static X_PhotoBrowser *instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^ {
+        instance = [[X_PhotoBrowser alloc] init];
+    });
+    return instance;
+}
+
+- (void)showPhoto:(NSArray *)array {
+    [self showPhoto:array
+         controller:[[[UIApplication sharedApplication] keyWindow] rootViewController]];
+}
+
+- (void)showPhoto:(NSArray *)array
+       controller:(UIViewController *)viewController {
+    [self showPhoto:array
+         controller:viewController
+         clickIndex:0];
+}
+
+- (void)showPhoto:(NSArray *)array
+       controller:(UIViewController *)viewController
+       clickIndex:(NSInteger)clickIndex {
+    
+    if (_imageList) {
+        [_imageList removeAllObjects];
+    }
+    else {
+        _imageList = [NSMutableArray new];
+    }
+    //开始处理图片
+    MWPhoto *photo = nil;
+    for (id item in array) {
+        if ([item isKindOfClass:[NSString class]]) {
+            //如果是字符串，那么我们理解为url
+            photo = [MWPhoto photoWithURL:[NSURL URLWithString:item]];
+        }
+        else if ([item isKindOfClass:[UIImage class]]) {
+            photo = [MWPhoto photoWithImage:item];
+        }
+        else {
+            //对于随便传输的，暂时不处理
+        }
+        if (photo != nil) {
+            [_imageList addObject:photo];
+        }
+    }
+    
+    //参数配置
+    // Create browser
+    BOOL displayActionButton = NO;
+    BOOL displaySelectionButtons = NO;
+    BOOL displayNavArrows = YES;
+    BOOL enableGrid = YES;
+    BOOL startOnGrid = NO;
+    
+    MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
+    browser.displayActionButton = displayActionButton;
+    browser.displayNavArrows = displayNavArrows;
+    browser.displaySelectionButtons = displaySelectionButtons;
+    browser.alwaysShowControls = displaySelectionButtons;
+    browser.zoomPhotosToFill = YES;
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
+    browser.wantsFullScreenLayout = YES;
+#endif
+    browser.enableGrid = enableGrid;
+    browser.startOnGrid = startOnGrid;
+    browser.enableSwipeToDismiss = NO;
+    [browser setCurrentPhotoIndex:clickIndex];
+    
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:browser];
+    navigationController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [viewController presentViewController:navigationController animated:YES completion:nil];
+    
+}
+
+#pragma mark - MWPhotoBrowserDelegate
+
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+    return [_imageList count];
+}
+
+- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+    if (index < _imageList.count)
+        return _imageList[index];
+    return nil;
+}
+@end

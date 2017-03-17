@@ -1,0 +1,98 @@
+//
+//  X_PhotoToolView.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_PhotoToolView.h"
+
+@implementation X_PhotoToolView
+
+- (instancetype)initWithTop:(CGRect)frame
+                     target:(id)target
+                     action:(SEL)action {
+    self = [super initWithFrame:frame];
+    if (self) {
+        //一共预计是3个按钮  Undo  Redo 清空
+        self.backgroundColor = [UIColor clearColor];
+        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:self.bounds];
+        toolbar.backgroundColor = [UIColor clearColor];
+        NSArray *btnStr = @[NSLocalizedString(@"Undo",nil), NSLocalizedString(@"Redo",nil), NSLocalizedString(@"EGOrganizationViewAllSetectButtonTitle1",nil)];
+        NSArray *btnImg = @[@"lastStep",@"nextStep",@"revoke"];
+        
+        NSMutableArray *items = [NSMutableArray new];
+        UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+        for (int i = 0; i < [btnStr count]; i++) {
+            UIBarButtonItem *item = [self getBarButton1:btnStr[i] :btnImg[i] tag:(101 + i) target:target action:action];
+            [items addObject:item];
+            item.enabled = NO;
+            if (i < [btnStr count] - 1) {
+                [items addObject:flexSpace];
+            }
+        }
+        [toolbar setItems:items];
+        [self addSubview:toolbar];
+    }
+    return self;
+}
+
+- (instancetype)initWithBottom:(CGRect)frame
+                        target:(id)target
+                        action:(SEL)action {
+    self = [super initWithFrame:frame];
+    if (self) {
+        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:self.bounds];
+        
+        NSArray *btnStr = @[NSLocalizedString(@"Color",nil), NSLocalizedString(@"Brush",nil),NSLocalizedString(@"Width",nil)];
+        NSArray *btnImg = @[@"color",@"panel",@"width"];
+        
+        NSMutableArray *items = [NSMutableArray new];
+        UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+        for (int i = 0; i < [btnStr count]; i++) {
+            [items addObject:[self getBarButton:btnStr[i] :btnImg[i] tag:(201 + i) target:target action:action]];
+            if (i < [btnStr count] - 1) {
+                [items addObject:flexSpace];
+            }
+        }
+        [toolbar setItems:items];
+        [self addSubview:toolbar];
+    }
+    return self;
+}
+
+//topItem
+- (UIBarButtonItem *)getBarButton1:(NSString *)title :(NSString *)imgName tag:(NSInteger)tag target:(id)target action:(SEL)action {
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(0, 0, 50, 50);
+    [btn setTitle:title forState:UIControlStateNormal];
+    [btn setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+    [btn setImageEdgeInsets:UIEdgeInsetsMake(-5, 7, 5, -7)];
+    [btn setTitleEdgeInsets:UIEdgeInsetsMake(15, -30, -15, 5)];
+    btn.titleLabel.font = [UIFont fontSize:13];
+    [btn addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    [btn setTitleColor:RGBACOLOR(177, 178, 179, 1) forState:UIControlStateNormal];
+    btn.tag = tag;
+    UIBarButtonItem *item = [[UIBarButtonItem alloc]initWithCustomView:btn];
+    item.tag = tag;
+    return item;
+}
+
+//bottomItem
+- (UIBarButtonItem *)getBarButton:(NSString *)title :(NSString *)imgName tag:(NSInteger)tag target:(id)target action:(SEL)action {
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(0, 0, 44, 44);
+    [btn setTitle:title forState:UIControlStateNormal];
+    [btn setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+    [btn setImageEdgeInsets:UIEdgeInsetsMake(-5, 7, 5, -7)];
+    [btn setTitleEdgeInsets:UIEdgeInsetsMake(15, -25, -15, 0)];
+    btn.titleLabel.font = [UIFont fontSize:12];
+    [btn addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    [btn setTitleColor:RGBACOLOR(110, 178, 252, 1) forState:UIControlStateNormal];
+    btn.tag = tag;
+    UIBarButtonItem *item = [[UIBarButtonItem alloc]initWithCustomView:btn];
+    return item;
+}
+
+@end

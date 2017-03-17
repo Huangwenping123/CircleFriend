@@ -1,0 +1,21 @@
+//
+//  X_PhotoToolView.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface X_PhotoToolView : UIView
+
+- (instancetype)initWithTop:(CGRect)frame
+                     target:(id)target
+                     action:(SEL)action;
+
+- (instancetype)initWithBottom:(CGRect)frame
+                        target:(id)target
+                        action:(SEL)action;
+
+@end

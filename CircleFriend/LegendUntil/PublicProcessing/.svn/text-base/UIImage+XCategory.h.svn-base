@@ -1,0 +1,18 @@
+//
+//  UIImage+XCategory.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/25.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface UIImage (XCategory)
+
+- (UIImage *)imageScaleAspectToMaxSize:(CGFloat)newSize;
+
+- (UIImage *)imageScaleAndCropToMaxSize:(CGSize)newSize;
+
+
+@end

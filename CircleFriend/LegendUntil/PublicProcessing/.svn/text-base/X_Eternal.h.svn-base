@@ -1,0 +1,40 @@
+//
+//  X_Eternal.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/22.
+//  Copyright (c) 2014年 CC. All rights reserved.
+//
+
+
+//与屏幕相关
+#define X_ScreenFrame [[UIScreen mainScreen] bounds]
+#define X_ScreenFrame_Height      X_ScreenFrame.size.height
+#define X_ScreenFrame_Width       X_ScreenFrame.size.width
+
+#define X_NavBarHeight  64
+//ios系统版本
+#define IOS_VERSION             [[[UIDevice currentDevice] systemVersion] floatValue]
+
+//判断pad
+#define ISPAD  [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad
+//iphone系列
+#define iPhone5 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640, 1136), [[UIScreen mainScreen] currentMode].size) : NO)
+
+#define iPhone6 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(750, 1334), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhone6Plus ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1242, 2208), [[UIScreen mainScreen] currentMode].size) : NO)
+
+//校验字符串是否为null
+#define checkStringNull(value) (value == nil ? @"" : value)
+
+//格式化
+#define formatString(...) [NSString stringWithFormat: __VA_ARGS__]
+
+#define WEAKSELF typeof(self) __weak weakSelf = self;
+
+//控制模式输出
+#ifndef __OPTIMIZE__
+#define NSLog(...) NSLog(__VA_ARGS__)
+#else
+#define NSLog(...){}
+#endif

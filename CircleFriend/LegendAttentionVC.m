@@ -9,6 +9,7 @@
 #import "LegendAttentionVC.h"
 #import "LegendAttentionCell.h"
 #import "LegendCircleFriendVC.h"
+#import "SDTimeLineTableViewController.h"
 @interface LegendAttentionVC ()<UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic, strong) UITableView *tableView;
 @end
@@ -90,6 +91,7 @@
     if (indexPath.section == 0) {
         if (indexPath.row == 0) {
             LegendCircleFriendVC *circleVC = [[LegendCircleFriendVC alloc] init];
+//            SDTimeLineTableViewController *circleVC = [[SDTimeLineTableViewController alloc] init];
             [self.navigationController pushViewController:circleVC animated:YES];
         }
     }

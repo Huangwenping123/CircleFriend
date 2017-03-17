@@ -1,0 +1,85 @@
+//
+//  X_DrawingView.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+typedef enum {
+    X_DrawingToolTypePen,
+    X_DrawingToolTypeLine,
+    X_DrawingToolTypeRectagleStroke,
+    X_DrawingToolTypeEllipseStroke,
+} X_DrawingToolType;
+
+@protocol X_DrawingViewDelegate, X_DrawingTool;
+
+@interface X_DrawingView : UIView
+
+@property (nonatomic, assign) X_DrawingToolType drawTool;
+@property (nonatomic, assign) id<X_DrawingViewDelegate> delegate;
+
+@property (nonatomic, strong) UIColor *lineColor; //线条颜色
+@property (nonatomic, assign) CGFloat lineWidth;//线条宽度
+
+@property (nonatomic, strong, readonly) UIImage *image;
+@property (nonatomic, strong) UIImage *prev_image;
+@property (nonatomic, readonly) NSUInteger undoSteps;
+
+/**
+ *  加载背景图
+ *
+ *  @param image
+ */
+- (void)loadImage:(UIImage *)image;
+
+/**
+ *  加载背景图
+ *
+ *  @param imageData
+ */
+- (void)loadImageData:(NSData *)imageData;
+
+/**
+ *  清空所有绘图
+ */
+- (void)clear;
+
+/**
+ *  判断是否可以回退
+ *
+ *  @return
+ */
+- (BOOL)canUndo;
+
+/**
+ *  返回上一步
+ */
+- (void)undoLastStep;
+
+/**
+ *  判断是否可以前进
+ *
+ *  @return
+ */
+- (BOOL)canRedo;
+
+/**
+ *  返回下一步
+ */
+- (void)redoLastStep;
+
+@end
+
+#pragma mark -
+
+@protocol X_DrawingViewDelegate <NSObject>
+
+@optional
+- (void)drawingView:(X_DrawingView *)view willBeginDrawUsingTool:(id<X_DrawingTool>)tool;
+- (void)drawingView:(X_DrawingView *)view didEndDrawUsingTool:(id<X_DrawingTool>)tool;
+
+@end

@@ -1,0 +1,32 @@
+//
+//  UIActionSheet+XBlock.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/22.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "UIActionSheet+XBlock.h"
+
+#import <objc/runtime.h>
+
+@implementation UIActionSheet (XBlock)
+
+static char key;
+
+- (void)showActionSheetViewWithCompleteBlock:(completeBlock)block {
+    if (block) {
+        objc_setAssociatedObject(self, &key, block, OBJC_ASSOCIATION_COPY);
+        self.delegate = self;
+    }
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    completeBlock block = objc_getAssociatedObject(self, &key);
+    if (block) {
+        block(buttonIndex);
+    }
+    objc_removeAssociatedObjects(self);
+}
+
+@end

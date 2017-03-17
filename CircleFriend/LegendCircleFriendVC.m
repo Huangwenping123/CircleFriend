@@ -11,6 +11,7 @@
 #import "CircleFriendModel.h"
 #import "UITableView+FDTemplateLayoutCell.h"
 #import "LegendDyHeadView.h"
+#import "LegendReleaseDynamicVC.h"
 
 @interface LegendCircleFriendVC ()
 {
@@ -29,12 +30,9 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.tableView registerClass:[LegendDynamicCell class] forCellReuseIdentifier:@"dycell"];
     self.tableView.tableHeaderView = self.headView;
-    UIButton *changeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    changeBtn.frame = CGRectMake(0, 0, 40, 40);
-    [changeBtn setImage:[UIImage imageNamed:@"MoreGame"] forState:UIControlStateNormal];
-    [changeBtn addTarget:self action:@selector(releaseDynamic) forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *rightBarItem = [[UIBarButtonItem alloc] initWithCustomView:changeBtn];
-    self.navigationItem.rightBarButtonItem = rightBarItem;
+
+    UIBarButtonItem *releaseBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"MoreGame"] style:UIBarButtonItemStylePlain target:self action:@selector(releaseDynamic)];
+    self.navigationItem.rightBarButtonItem = releaseBtn;
     [self loadData];
 }
 
@@ -44,7 +42,7 @@
 - (void)loadData{
     dataArray = [[NSMutableArray alloc] initWithCapacity:0];
     NSString *text = @"天气真的很好.";
-    for (int i = 0; i<20; i++) {
+    for (int i = 0; i<10; i++) {
         CircleFriendModel *cfmodel = [[CircleFriendModel alloc] init];
         cfmodel.userName = [NSString stringWithFormat:@"ddd哇外%d方法",i];
         NSMutableArray *imarray = [[NSMutableArray alloc]initWithCapacity:0];
@@ -147,7 +145,6 @@
     CGFloat height = [self.tableView fd_heightForCellWithIdentifier:@"dycell" configuration:^(LegendDynamicCell *cell) {
         [self configureOriCell:cell atIndexPath:indexPath];
     }];
-    NSLog(@"%g======",height);
     return height;
 }
 
@@ -160,7 +157,8 @@
 
 - (void)releaseDynamic{
     
-    
+    LegendReleaseDynamicVC *releaseVC = [[LegendReleaseDynamicVC alloc] init];
+    [self.navigationController pushViewController:releaseVC animated:YES];
 
 }
 

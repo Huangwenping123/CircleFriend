@@ -1,0 +1,222 @@
+//
+//  X_PhotoDeal.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/22.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_PhotoDeal.h"
+
+#import "X_PhotoCropVC.h"
+#import "X_PhotoDrawingVC.h"
+
+#import "UIActionSheet+XBlock.h"
+#import "UIView+Tosat.h"
+#import "X_Eternal.h"
+
+typedef void (^X_PhotoBlock)(UIImage *targetImg);
+
+
+@interface X_PhotoDeal () <UINavigationControllerDelegate,UIImagePickerControllerDelegate>
+
+@property (nonatomic,   copy) X_PhotoBlock photoBlock;
+@property (nonatomic,   copy) UIImage *image;
+
+@property (nonatomic, strong) UIImagePickerController *pickerController;
+@end
+
+@implementation X_PhotoDeal
+
+- (void)dealPhoto:(UIViewController *)viewController
+  completionBlock:(void (^)(UIImage *targetImg))completionBlock {
+    //直接弹出选择器
+    
+    if (self.photoBlock == nil) {
+        self.photoBlock = completionBlock;
+        self.pickerController = [[UIImagePickerController alloc] init];
+        self.pickerController.delegate = self;
+    }
+    self.image = nil;
+    
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:NSLocalizedString(@"Pleasechoose",nil)
+                                                             delegate:nil
+                                                    cancelButtonTitle:NSLocalizedString(@"cancelButtonTitle",nil)
+                                               destructiveButtonTitle:nil
+                                                    otherButtonTitles:NSLocalizedString(@"UserCamera",nil),NSLocalizedString(@"ChoosePhotos",nil), nil];
+    actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+    WEAKSELF
+    [actionSheet showActionSheetViewWithCompleteBlock:^(NSInteger buttonIndex) {
+        if (buttonIndex == 0) {
+            //检查相机模式是否可用
+            if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+                [viewController.view makeToast:NSLocalizedString(@"Notsupportphotos",nil)];
+                return;
+            }
+            weakSelf.pickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+        }
+        else if (buttonIndex == 1) {
+            weakSelf.pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            
+        }
+        else {
+            return;
+        }
+        [viewController presentViewController:weakSelf.pickerController
+                                     animated:YES
+                                   completion:NULL];
+    }];
+    [actionSheet showInView:[viewController view]];
+}
+
+- (void)beginPushVC {
+    WEAKSELF
+    if (self.pickerController.sourceType == UIImagePickerControllerSourceTypeCamera) {
+        
+        //由于拍照的特殊性，点击使用照片，那么就已经有操作了
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                                 delegate:nil
+                                                        cancelButtonTitle:NSLocalizedString(@"Cancel",nil)
+                                                   destructiveButtonTitle:nil
+                                                        otherButtonTitles:NSLocalizedString(@"ImageResizer",nil),NSLocalizedString(@"ImageScrawl",nil),NSLocalizedString(@"GetImage",nil), nil];
+        actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+        [actionSheet showActionSheetViewWithCompleteBlock:^(NSInteger buttonIndex) {
+            UIViewController *vc = nil;
+            if (buttonIndex == 0) {
+                vc = [[X_PhotoCropVC alloc] initWithImage:weakSelf.image
+                                                    block:weakSelf.photoBlock];
+            }
+            else if (buttonIndex == 1) {
+                vc = [[X_PhotoDrawingVC alloc] initWithImage:weakSelf.image
+                                                       block:weakSelf.photoBlock];
+            }
+            else if (buttonIndex == 2) {
+                [weakSelf.pickerController dismissViewControllerAnimated:YES completion:^{
+                    weakSelf.photoBlock(weakSelf.image);
+                }];
+                return ;
+            }
+            else if (buttonIndex == 3)
+            {
+                [weakSelf.pickerController dismissViewControllerAnimated:YES completion:nil];
+                return;
+            }
+            else {
+                return;
+            }
+            [weakSelf.pickerController pushViewController:vc animated:YES];
+        }];
+        [actionSheet showInView:[self.pickerController view]];
+    }
+    else {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                                 delegate:nil
+                                                        cancelButtonTitle:NSLocalizedString(@"Cancel",nil)
+                                                   destructiveButtonTitle:nil
+                                                        otherButtonTitles:NSLocalizedString(@"ImageResizer",nil),NSLocalizedString(@"ImageScrawl",nil),NSLocalizedString(@"GetImage",nil), nil];
+        actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+        [actionSheet showActionSheetViewWithCompleteBlock:^(NSInteger buttonIndex) {
+            UIViewController *vc = nil;
+            if (buttonIndex == 0) {
+                vc = [[X_PhotoCropVC alloc] initWithImage:weakSelf.image
+                                                    block:weakSelf.photoBlock];
+            }
+            else if (buttonIndex == 1) {
+                vc = [[X_PhotoDrawingVC alloc] initWithImage:weakSelf.image
+                                                       block:weakSelf.photoBlock];
+            }
+            else if (buttonIndex == 2) {
+                [weakSelf.pickerController dismissViewControllerAnimated:YES completion:^{
+                    weakSelf.photoBlock(weakSelf.image);
+                }];
+                return ;
+            }
+            else {
+                return;
+            }
+            [weakSelf.pickerController pushViewController:vc animated:YES];
+        }];
+        [actionSheet showInView:[self.pickerController view]];
+    }
+}
+
+#pragma mark -
+#pragma mark UIImagePickerControllerDelegate
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    self.image = nil;
+    self.image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    
+    //得到图片，我们立即进入下一个界面
+    [self beginPushVC];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:NULL];
+
+}
+
+#pragma mark -
+#pragma mark UINavigationControllerDelegate
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    if (self.pickerController.sourceType == UIImagePickerControllerSourceTypeCamera) {
+        if (navigationController.viewControllers.count == 2) {
+            if (navigationController.navigationBarHidden) {
+                [navigationController setNavigationBarHidden:NO animated:YES];
+                [[UIApplication sharedApplication] setStatusBarHidden:NO];
+            }
+        }
+    }
+}
+-(void)navigationController:(UINavigationController *)navigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated{
+    
+}
+
+/******************************************************以下为单独处理*************************************************/
+
+
++ (X_PhotoDeal *)sharedInstance {
+    static X_PhotoDeal *instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^ {
+        instance = [[X_PhotoDeal alloc] init];
+    });
+    return instance;
+}
+
+- (void)dealPhoto:(UIImage *)originImg
+             type:(X_IMGDEALTYPE)type
+  completionBlock:(void (^)(UIImage *targetImg))completionBlock  controller:(UIViewController *)controller{
+    [self dealPhoto:originImg
+               type:type
+         controller:controller
+    completionBlock:completionBlock];
+}
+
+- (void)dealPhoto:(UIImage *)originImg
+             type:(X_IMGDEALTYPE)type
+       controller:(UIViewController *)viewController
+  completionBlock:(void (^)(UIImage *targetImg))completionBlock {
+    
+    UIViewController *vc = nil;
+    
+    if (type == IMG_CROP) {
+        vc = [[X_PhotoCropVC alloc] initWithImage:originImg
+                                            block:completionBlock];
+    }
+    else if (type == IMG_DRAW) {
+        vc = [[X_PhotoDrawingVC alloc] initWithImage:originImg
+                                               block:completionBlock];
+    }
+    
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:vc];
+    navigationController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [viewController presentViewController:navigationController animated:YES completion:nil];
+}
+
+- (void)dealloc
+{
+    NSLog(@"X_PhotoDeal dealloc");
+}
+
+@end

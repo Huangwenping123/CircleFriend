@@ -113,12 +113,15 @@
     [self.contentView addSubview:self.commentBtn];
     
     self.comentView = [[LegendCommentView alloc] init];
+    
     [self.contentView addSubview:self.comentView];
     
     
     self.lineview = [[UIView alloc] init];
     self.lineview.backgroundColor = [UIColor lightGrayColor];
     [self.contentView addSubview:self.lineview];
+
+    dyTextMaxHeight = self.dyText.font.pointSize*10;
 
     [self setSubViewLayOut];
 
@@ -145,14 +148,16 @@
         make.top.equalTo(self.nameLabel.mas_bottom).offset(5);
         make.left.equalTo(self.nameLabel);
         make.right.equalTo(self.contentView).offset(-15);
+        make.bottom.equalTo(self.moreBtn.mas_top).offset(-5);
         
     }];
+    
     [self.moreBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self.dyText.mas_bottom);
+//        make.top.equalTo(self.dyText.mas_bottom);
         make.left.equalTo(self.dyText);
         make.height.offset(CGFLOAT_MIN);
-//        make.bottom.equalTo(self.photoView.mas_top);
     }];
+    
     [self.photoView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.dyText.mas_left);
         make.top.equalTo(self.moreBtn.mas_bottom);
@@ -169,7 +174,7 @@
     
     [self.timeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.locationBtn.mas_bottom);
-        make.bottom.equalTo(self.comentView.mas_bottom);
+        make.bottom.equalTo(self.comentView.mas_top);
         make.left.equalTo(self.dyText);
     }];
     
@@ -204,9 +209,10 @@
     [self.comentView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.timeLabel.mas_bottom);
         make.left.equalTo(self.timeLabel);
-        make.right.equalTo(self.commentBtn.mas_right);
-        make.bottom.equalTo(self.lineview.mas_top).offset(5);
-        make.height.offset(80);
+        make.right.equalTo(self.contentView).offset(-15);
+        make.height.offset(100);
+        make.bottom.equalTo(self.lineview.mas_top).offset(-5);
+
     }];
     
     [self.lineview mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -239,44 +245,28 @@
     self.dyText.text = model.dyText;
     
     CGRect textSize = [model.dyText boundingRectWithSize:CGSizeMake(cellContentWidth, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14]} context:nil];
-    dyTextHeight = textSize.size.height+5;
-    dyTextMaxHeight = self.dyText.font.pointSize*10;
+    dyTextHeight = textSize.size.height;
     self.moreBtn.selected = model.isOpen;
-    if (model.isOpen) {
+    if (dyTextHeight>dyTextMaxHeight) {//若果高度在10行范围内，则不更新布局
         self.moreBtn.hidden = NO;
         [self.moreBtn mas_updateConstraints:^(MASConstraintMaker *make) {
             make.height.offset(30);
         }];
-        if (self.moreBtn.selected) {
-            [self.dyText mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.offset(dyTextHeight);
-            }];
-        }
-        else{
-            [self.dyText mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.offset(dyTextMaxHeight);
-            }];
+        if (model.isOpen) {
+            self.dyText.numberOfLines = 0;
+        }else{
+            self.dyText.numberOfLines = 6;
         }
     }else{
-        if (textSize.size.height>dyTextMaxHeight) {
-            self.moreBtn.hidden = NO;
-            [self.moreBtn mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.offset(30);
-            }];
-            [self.dyText mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.offset(dyTextMaxHeight);
-            }];
-        }else{
-            self.moreBtn.hidden = YES;
-            [self.moreBtn mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.offset(CGFLOAT_MIN);
-            }];
-            [self.dyText mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.offset(dyTextHeight);
-            }];
-        }
+        
+        self.moreBtn.hidden = YES;
+        [self.moreBtn mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.offset(CGFLOAT_MIN);
+        }];
+        
+        
     }
-    
+  
     self.timeLabel.text = [self timeTransform:model.timeDate];
     
     if (model.videoUrl.length>1) {
@@ -287,6 +277,8 @@
         self.photoView.picUrlArray = model.thumbnailPicUrls;
         self.photoView.picOriArray = model.originalPicUrls;
     }
+    self.comentView.comentArray = nil;
+    
     self.locationBtn.hidden = NO;
     [self.locationBtn setTitle:@"南京 南京理工大学" forState:(UIControlStateNormal)];
     [self.locationBtn mas_updateConstraints:^(MASConstraintMaker *make) {

@@ -1,0 +1,73 @@
+//
+//  X_DrawingTools.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+/**
+ *  所有的涂鸦的基类
+ */
+@protocol X_DrawingTool <NSObject>
+
+@property (nonatomic, strong) UIColor *lineColor; //线条颜色
+@property (nonatomic, assign) CGFloat lineWidth; //线条粗细
+
+- (void)setInitialPoint:(CGPoint)firstPoint;
+- (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint;
+
+- (void)draw;
+
+@end
+
+/**
+ *  任意类型
+ */
+@interface X_DrawingPenTool : UIBezierPath<X_DrawingTool> {
+    CGMutablePathRef path;
+}
+
+- (CGRect)addPathPreviousPreviousPoint:(CGPoint)p2Point
+                     withPreviousPoint:(CGPoint)p1Point
+                      withCurrentPoint:(CGPoint)cpoint;
+
+@end
+
+
+/**
+ *  直线
+ */
+@interface X_DrawingLineTool : NSObject<X_DrawingTool>
+
+@end
+
+
+/**
+ *  直线箭头
+ */
+@interface X_DrawingLineArrowTool : NSObject<X_DrawingTool>
+
+@end
+
+/**
+ *  方框
+ */
+
+@interface X_DrawingRectangleTool : NSObject<X_DrawingTool>
+
+
+@end
+
+/**
+ *  圆
+ */
+
+@interface X_DrawingEllipseTool : NSObject<X_DrawingTool>
+
+
+@end
+

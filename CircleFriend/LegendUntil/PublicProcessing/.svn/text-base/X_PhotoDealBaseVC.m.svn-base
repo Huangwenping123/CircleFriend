@@ -1,0 +1,55 @@
+//
+//  X_PhotoDealBaseVC.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/24.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_PhotoDealBaseVC.h"
+
+@interface X_PhotoDealBaseVC ()
+
+@end
+
+@implementation X_PhotoDealBaseVC
+
+- (void)cancelAction {
+    //判断是否属于多层，如果是单层，那么直接返回，否则就返回上一页
+    if ([self.navigationController.viewControllers count] > 1) {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+    else {
+        [self dismissViewControllerAnimated:YES completion:NULL];
+    }
+}
+
+- (void)okAction {}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+    }
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    UIBarButtonItem *left = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel",nil)
+                                                             style:UIBarButtonItemStylePlain
+                                                            target:self
+                                                            action:@selector(cancelAction)];
+    self.navigationItem.leftBarButtonItem = left;
+    
+    UIBarButtonItem *right = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Confirm",nil)
+                                                              style:UIBarButtonItemStylePlain
+                                                             target:self
+                                                             action:@selector(okAction)];
+    self.navigationItem.rightBarButtonItem = right;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end

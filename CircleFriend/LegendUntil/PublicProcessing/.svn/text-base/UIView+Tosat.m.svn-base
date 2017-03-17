@@ -1,0 +1,173 @@
+//
+//  UIView+Tosat.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/24.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "UIView+Tosat.h"
+
+#import <objc/runtime.h>
+
+static const NSTimeInterval X_ToastDefaultDuration  = 1.0;
+
+static const CGFloat X_ToastMaxWidth            = 0.8;
+static const CGFloat X_ToastMaxHeight           = 0.8;
+static const CGFloat X_ToastHorizontalPadding   = 10.0;
+static const CGFloat X_ToastVerticalPadding     = 10.0;
+static const CGFloat X_ToastCornerRadius        = 10.0;
+static const CGFloat X_ToastOpacity             = 0.8;
+static const CGFloat X_ToastFontSize            = 16.0;
+static const CGFloat X_ToastMaxMessageLines     = 0;
+static const NSTimeInterval X_ToastFadeDuration = 0.2;
+
+static const CGFloat X_ToastShadowOpacity       = 0.8;
+static const CGFloat X_ToastShadowRadius        = 6.0;
+static const CGSize  X_ToastShadowOffset        = { 4.0, 4.0 };
+static const BOOL    X_ToastDisplayShadow       = YES;
+
+NSString * const X_ToastPositionTop             = @"top";
+NSString * const X_ToastPositionCenter          = @"center";
+NSString * const X_ToastPositionBottom          = @"bottom";
+
+static const NSString * X_ToastTimerKey         = @"X_ToastTimerKey";
+
+
+@implementation UIView (Tosat)
+
+- (void)makeToast:(NSString *)message {
+    [self makeToast:message duration:X_ToastDefaultDuration position:nil];
+}
+
+- (void)makeToast:(NSString *)message duration:(NSTimeInterval)duration position:(id)position {
+    UIView *toast = [self viewForMessage:message];
+    [self showToast:toast duration:duration position:position];
+}
+
+- (void)showToast:(UIView *)toast duration:(NSTimeInterval)duration position:(id)position {
+    toast.center = [self centerPointForPosition:position withToast:toast];
+    toast.alpha = 0.0;
+    
+    [self addSubview:toast];
+    
+    [UIView animateWithDuration:X_ToastFadeDuration
+                          delay:0.0
+                        options:(UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction)
+                     animations:^{
+                         toast.alpha = 1.0;
+                     } completion:^(BOOL finished) {
+                         NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:duration target:self selector:@selector(toastTimerDidFinish:) userInfo:toast repeats:NO];
+                         objc_setAssociatedObject (toast, &X_ToastTimerKey, timer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                     }];
+}
+
+- (UIView *)viewForMessage:(NSString *)message {
+    
+    if(message == nil) return nil;
+    
+    UILabel *messageLabel = nil;
+    
+    UIView *wrapperView = [[UIView alloc] init];
+    wrapperView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+    wrapperView.layer.cornerRadius = X_ToastCornerRadius;
+    
+    if (X_ToastDisplayShadow) {
+        wrapperView.layer.shadowColor = [UIColor blackColor].CGColor;
+        wrapperView.layer.shadowOpacity = X_ToastShadowOpacity;
+        wrapperView.layer.shadowRadius = X_ToastShadowRadius;
+        wrapperView.layer.shadowOffset = X_ToastShadowOffset;
+    }
+    
+    wrapperView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:X_ToastOpacity];
+    
+    if (message != nil) {
+        messageLabel = [[UILabel alloc] init];
+        messageLabel.numberOfLines = X_ToastMaxMessageLines;
+        messageLabel.font = [UIFont fontSize:X_ToastFontSize];
+        messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        messageLabel.textColor = [UIColor whiteColor];
+        messageLabel.backgroundColor = [UIColor clearColor];
+        messageLabel.alpha = 1.0;
+        messageLabel.text = message;
+        
+        CGSize maxSizeMessage = CGSizeMake((self.bounds.size.width * X_ToastMaxWidth), self.bounds.size.height * X_ToastMaxHeight);
+        CGSize expectedSizeMessage = [self sizeForString:message font:messageLabel.font constrainedToSize:maxSizeMessage lineBreakMode:messageLabel.lineBreakMode];
+        messageLabel.frame = CGRectMake(0.0, 0.0, expectedSizeMessage.width, expectedSizeMessage.height);
+    }
+    
+    
+    CGFloat messageWidth, messageHeight, messageLeft, messageTop;
+    
+    if(messageLabel != nil) {
+        messageWidth = messageLabel.bounds.size.width;
+        messageHeight = messageLabel.bounds.size.height;
+        messageLeft = X_ToastHorizontalPadding;
+        messageTop = X_ToastVerticalPadding;
+    } else {
+        messageWidth = messageHeight = messageLeft = messageTop = 0.0;
+    }
+    
+    CGFloat longerWidth = messageWidth;
+    CGFloat longerLeft = messageLeft;
+    
+    CGFloat wrapperWidth = MAX(((X_ToastHorizontalPadding * 2)), (longerLeft + longerWidth + X_ToastHorizontalPadding));
+    CGFloat wrapperHeight = MAX((messageTop + messageHeight + X_ToastVerticalPadding), (X_ToastVerticalPadding * 2));
+    
+    wrapperView.frame = CGRectMake(0.0, 0.0, wrapperWidth, wrapperHeight);
+    
+    
+    if(messageLabel != nil) {
+        messageLabel.frame = CGRectMake(messageLeft, messageTop, messageWidth, messageHeight);
+        [wrapperView addSubview:messageLabel];
+    }
+    
+    return wrapperView;
+}
+
+- (CGSize)sizeForString:(NSString *)string font:(UIFont *)font constrainedToSize:(CGSize)constrainedSize lineBreakMode:(NSLineBreakMode)lineBreakMode {
+    if ([string respondsToSelector:@selector(boundingRectWithSize:options:attributes:context:)]) {
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        paragraphStyle.lineBreakMode = lineBreakMode;
+        NSDictionary *attributes = @{NSFontAttributeName:font, NSParagraphStyleAttributeName:paragraphStyle};
+        CGRect boundingRect = [string boundingRectWithSize:constrainedSize options:NSStringDrawingUsesLineFragmentOrigin attributes:attributes context:nil];
+        return CGSizeMake(ceilf(boundingRect.size.width), ceilf(boundingRect.size.height));
+    }
+    
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [string sizeWithFont:font constrainedToSize:constrainedSize lineBreakMode:lineBreakMode];
+#pragma clang diagnostic pop
+}
+
+- (CGPoint)centerPointForPosition:(id)point withToast:(UIView *)toast {
+    if([point isKindOfClass:[NSString class]]) {
+        if([point caseInsensitiveCompare:X_ToastPositionTop] == NSOrderedSame) {
+            return CGPointMake(self.bounds.size.width/2, (toast.frame.size.height / 2) + X_ToastVerticalPadding);
+        } else if([point caseInsensitiveCompare:X_ToastPositionCenter] == NSOrderedSame) {
+            return CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
+        }
+    } else if ([point isKindOfClass:[NSValue class]]) {
+        return [point CGPointValue];
+    }
+    
+    return CGPointMake(self.bounds.size.width/2, (self.bounds.size.height - (toast.frame.size.height / 2)) - X_ToastVerticalPadding);
+}
+
+- (void)hideToast:(UIView *)toast {
+    [UIView animateWithDuration:X_ToastFadeDuration
+                          delay:0.0
+                        options:(UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionBeginFromCurrentState)
+                     animations:^{
+                         toast.alpha = 0.0;
+                     } completion:^(BOOL finished) {
+                         [toast removeFromSuperview];
+                     }];
+}
+
+#pragma mark - Events
+
+- (void)toastTimerDidFinish:(NSTimer *)timer {
+    [self hideToast:(UIView *)timer.userInfo];
+}
+@end

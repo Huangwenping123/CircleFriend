@@ -1,0 +1,21 @@
+//
+//  X_PhotoDrawingVC.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/22.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "X_PhotoDeal.h"
+
+#import "X_PhotoDealBaseVC.h"
+
+typedef void (^X_PhotoDrawingBlock)(UIImage *targetImg);
+
+@interface X_PhotoDrawingVC : X_PhotoDealBaseVC
+
+- (instancetype)initWithImage:(UIImage *)originImg
+                        block:(X_PhotoDrawingBlock)block;
+
+@end

@@ -1,0 +1,474 @@
+//
+//  X_ImageCropperView.m
+//  图像处理
+//
+//  Created by xiongyw on 15/5/6.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_ImageCropperView.h"
+
+#define SIZE 30.0f
+
+static const int kCropLines = 2;
+
+@interface X_ImageCropperOverlayView : UIView
+
+@property (nonatomic, assign) CGRect clearRect;
+@property (nonatomic, assign) CGSize maxSize;
+
+@property (readonly) CGRect topLeftCorner;
+@property (readonly) CGRect topRightCorner;
+@property (readonly) CGRect bottomLeftCorner;
+@property (readonly) CGRect bottomRightCorner;
+
+@property (readonly) CGRect topEdgeRect;
+@property (readonly) CGRect rightEdgeRect;
+@property (readonly) CGRect bottomEdgeRect;
+@property (readonly) CGRect leftEdgeRect;
+
+- (BOOL)isCornerContainsPoint:(CGPoint)point;
+- (BOOL)isEdgeContainsPoint:(CGPoint)point;
+
+@end
+
+@implementation X_ImageCropperOverlayView
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor clearColor];
+    }
+    return self;
+}
+
+- (CGRect)edgeRect {
+    return CGRectMake(CGRectGetMinX(self.clearRect) - SIZE / 2,
+                      CGRectGetMinY(self.clearRect) - SIZE / 2,
+                      CGRectGetWidth(self.clearRect) + SIZE,
+                      CGRectGetHeight(self.clearRect) + SIZE);
+}
+
+- (CGRect)topLeftCorner {
+    return CGRectMake(CGRectGetMinX(self.clearRect) - SIZE / 2,
+                      CGRectGetMinY(self.clearRect) - SIZE / 2,
+                      SIZE, SIZE);
+}
+
+- (CGRect)topRightCorner {
+    return CGRectMake(CGRectGetMaxX(self.clearRect) - SIZE / 2,
+                      CGRectGetMinY(self.clearRect) - SIZE / 2,
+                      SIZE, SIZE);
+}
+
+- (CGRect)bottomLeftCorner {
+    return CGRectMake(CGRectGetMinX(self.clearRect) - SIZE / 2,
+                      CGRectGetMaxY(self.clearRect) - SIZE / 2,
+                      SIZE, SIZE);
+}
+
+- (CGRect)bottomRightCorner {
+    return CGRectMake(CGRectGetMaxX(self.clearRect) - SIZE / 2,
+                      CGRectGetMaxY(self.clearRect) - SIZE / 2,
+                      SIZE, SIZE);
+}
+
+- (CGRect)topEdgeRect {
+    return CGRectMake(CGRectGetMinX([self edgeRect]) + SIZE,
+                      CGRectGetMinY([self edgeRect]),
+                      CGRectGetWidth([self edgeRect]) - SIZE * 2, SIZE);
+}
+
+- (CGRect)rightEdgeRect {
+    return CGRectMake(CGRectGetMaxX([self edgeRect]) - SIZE,
+                      CGRectGetMinY([self edgeRect]) + SIZE,
+                      SIZE, CGRectGetHeight([self edgeRect]) - SIZE * 2);
+}
+
+- (CGRect)bottomEdgeRect {
+    return CGRectMake(CGRectGetMinX([self edgeRect]) + SIZE,
+                      CGRectGetMaxY([self edgeRect]) - SIZE,
+                      CGRectGetWidth([self edgeRect]) - SIZE * 2, SIZE);
+}
+
+- (CGRect)leftEdgeRect {
+    return CGRectMake(CGRectGetMinX([self edgeRect]),
+                      CGRectGetMinY([self edgeRect]) + SIZE,
+                      SIZE, CGRectGetHeight([self edgeRect]) - SIZE * 2);
+}
+
+- (BOOL)isEdgeContainsPoint:(CGPoint)point {
+    return CGRectContainsPoint([self topEdgeRect], point)
+    || CGRectContainsPoint([self rightEdgeRect], point)
+    || CGRectContainsPoint([self bottomEdgeRect], point)
+    || CGRectContainsPoint([self leftEdgeRect], point);
+}
+
+- (BOOL)isCornerContainsPoint:(CGPoint)point {
+    return CGRectContainsPoint([self topLeftCorner], point)
+    || CGRectContainsPoint([self topRightCorner], point)
+    || CGRectContainsPoint([self bottomLeftCorner], point)
+    || CGRectContainsPoint([self bottomRightCorner], point);
+}
+
+- (void)drawRect:(CGRect)rect {
+    [super drawRect:rect];
+    
+    CGContextRef c = UIGraphicsGetCurrentContext();
+    CGContextSetShouldAntialias(c, YES);
+    
+    CGContextSetFillColorWithColor(c, [UIColor colorWithWhite:0 alpha:0.6].CGColor);
+    CGContextAddRect(c, self.frame);
+    CGContextFillPath(c);
+    
+    CGContextClearRect(c, self.clearRect);
+    CGContextFillPath(c);
+    
+    CGContextSetFillColorWithColor(c, [UIColor colorWithWhite:1 alpha:0.5].CGColor);
+    
+    CGContextSaveGState(c);
+    CGContextSetShouldAntialias(c, NO);
+    
+    CGFloat margin = SIZE / 4;
+    
+    CGRect clip = CGRectOffset(self.clearRect, -margin * 0.4f, -margin * 0.4f);
+    clip.size.width += margin * 0.8f, clip.size.height += margin * 0.8f;
+    CGContextClipToRect(c, clip);
+    
+    CGContextAddRect(c, self.topLeftCorner);
+    CGContextAddRect(c, self.topRightCorner);
+    CGContextAddRect(c, self.bottomLeftCorner);
+    CGContextAddRect(c, self.bottomRightCorner);
+    CGContextFillPath(c);
+    
+    margin = SIZE / 8;
+    clip = CGRectOffset(self.clearRect, margin, margin);
+    clip.size.width -= margin * 2, clip.size.height -= margin * 2;
+    CGContextClearRect(c, clip);
+    CGContextRestoreGState(c);
+    
+    CGContextSetStrokeColorWithColor(c, [UIColor whiteColor].CGColor);
+    CGContextSetLineWidth(c, 1);
+    
+    CGContextAddRect(c, self.clearRect);
+    
+    CGPoint from, to;
+    
+    for (int i = 1; i <= kCropLines; i++) {
+        from = CGPointMake(self.clearRect.origin.x + self.clearRect.size.width / 3.0f * i, self.clearRect.origin.y);
+        to = CGPointMake(from.x, CGRectGetMaxY(self.clearRect));
+        CGContextMoveToPoint(c, from.x, from.y);
+        CGContextAddLineToPoint(c, to.x, to.y);
+    }
+    
+    for (int i = 1; i <= kCropLines; i++) {
+        from = CGPointMake(self.clearRect.origin.x, self.clearRect.origin.y + self.clearRect.size.height / 3.0f * i);
+        to = CGPointMake(CGRectGetMaxX(self.clearRect), from.y);
+        CGContextMoveToPoint(c, from.x, from.y);
+        CGContextAddLineToPoint(c, to.x, to.y);
+    }
+    
+    CGContextStrokePath(c);
+}
+
+@end
+
+typedef NS_ENUM(NSUInteger, X_OverlayViewPanningMode) {
+    OverlayViewPanningModeNone     = 0,
+    OverlayViewPanningModeLeft     = 1 << 0,
+    OverlayViewPanningModeRight    = 1 << 1,
+    OverlayViewPanningModeTop      = 1 << 2,
+    OverlayViewPanningModeBottom   = 1 << 3
+};
+
+static CGSize minSize = {40, 40};
+
+@interface X_ImageCropperView ()
+
+@property (nonatomic, assign) CGPoint firstTouchedPoint;
+
+@property (nonatomic, assign) X_OverlayViewPanningMode OverlayViewPanningMode;
+
+@property (nonatomic, assign) BOOL isPanningOverlayView;
+
+@property (nonatomic, assign) CGFloat currentScale;
+
+@property (nonatomic, strong) UIImageView *imageView;
+
+@property (nonatomic, strong) UIImage *image;
+
+@property (nonatomic, assign) CGRect baseRect;
+
+@property (nonatomic, strong) X_ImageCropperOverlayView *overlayView;
+
+@end
+
+@implementation X_ImageCropperView
+
+- (instancetype)initWithFrame:(CGRect)frame image:(UIImage *)image {
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.image = image;
+        
+        self.backgroundColor = [UIColor blackColor];
+        
+        self.imageView = [[UIImageView alloc] init];
+        self.imageView.image = image;
+        
+        UIPinchGestureRecognizer *pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self
+                                                                                                     action:@selector(pinchGesture:)];
+        [self addGestureRecognizer:pinchGestureRecognizer];
+        
+        UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self
+                                                                                               action:@selector(panGesture:)];
+        panGestureRecognizer.maximumNumberOfTouches = 1;
+        [self addGestureRecognizer:panGestureRecognizer];
+        
+        CGRect rect = CGRectZero;
+        rect.size = [self getImageSizeForPreview:image];
+        self.imageView.frame = rect;
+        self.imageView.center = self.center;
+        self.baseRect = self.imageView.frame;
+        [self addSubview:self.imageView];
+        
+        
+        self.overlayView = [[X_ImageCropperOverlayView alloc] initWithFrame:self.frame];
+        self.overlayView.maxSize = self.baseRect.size;
+        [self addSubview:self.overlayView];
+        
+        [self reset];
+    }
+    
+    return self;
+}
+
+- (UIImage *)getCroppedImage {
+    CGFloat scale = self.image.size.width / self.imageView.frame.size.width;
+    CGRect rect = self.overlayView.clearRect;
+    rect.origin.x = (rect.origin.x - self.imageView.frame.origin.x) * scale;
+    rect.origin.y = (rect.origin.y - self.imageView.frame.origin.y) * scale;
+    rect.size.width *= scale;
+    rect.size.height *= scale;
+    
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef c = UIGraphicsGetCurrentContext();
+    CGContextClipToRect(c, CGRectMake(0, 0, rect.size.width, rect.size.height));
+    [self.image drawInRect:CGRectMake(-rect.origin.x, -rect.origin.y, self.image.size.width, self.image.size.height)];
+    UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return result;
+}
+
+- (void)reset {
+    self.currentScale = 1.0;
+    self.imageView.frame = self.baseRect;
+    CGRect clearRect = self.baseRect;
+    clearRect.origin = CGPointMake((self.frame.size.width - self.baseRect.size.width) / 2.0f,
+                                   (self.frame.size.height - self.baseRect.size.height) / 2.0f);
+    self.overlayView.clearRect = clearRect;
+    [self.overlayView setNeedsDisplay];
+}
+
+- (CGSize)getImageSizeForPreview:(UIImage *)image {
+    CGFloat maxWidth = self.frame.size.width - 40, maxHeight = self.frame.size.height - 40;
+    
+    CGSize size = image.size;
+    
+    if (size.width > maxWidth) {
+        size.height *= (maxWidth / size.width);
+        size.width = maxWidth;
+    }
+    
+    if (size.height > maxHeight) {
+        size.width *= (maxHeight / size.height);
+        size.height = maxHeight;
+    }
+    
+    if (size.width < minSize.width) {
+        size.height *= (minSize.width / size.width);
+        size.width = minSize.width;
+    }
+    
+    if (size.height < minSize.height) {
+        size.width *= (minSize.height / size.height);
+        size.height = minSize.height;
+    }
+    
+    return size;
+}
+
+- (void)setCurrentScale:(CGFloat)currentScale {
+    _currentScale = MAX(1.0f, currentScale);
+}
+
+- (BOOL)shouldRevertX {
+    CGRect clearRect = self.overlayView.clearRect;
+    CGRect imageRect = self.imageView.frame;
+    
+    if (CGRectGetMinX(imageRect) > CGRectGetMinX(clearRect)
+        || CGRectGetMaxX(imageRect) < CGRectGetMaxX(clearRect)) {
+        return YES;
+    }
+    
+    if (CGRectGetMinX(clearRect) < CGRectGetMinX(self.baseRect)
+        || CGRectGetMaxX(clearRect) > CGRectGetMaxX(self.baseRect)) {
+        return YES;
+    }
+    
+    if (clearRect.size.width < minSize.width) {
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (BOOL)shouldRevertY {
+    CGRect clearRect = self.overlayView.clearRect;
+    CGRect imageRect = self.imageView.frame;
+    
+    if (CGRectGetMinY(imageRect) > CGRectGetMinY(clearRect)
+        || CGRectGetMaxY(imageRect) < CGRectGetMaxY(clearRect)) {
+        return YES;
+    }
+    
+    if (CGRectGetMinY(clearRect) < CGRectGetMinY(self.baseRect)
+        || CGRectGetMaxY(clearRect) > CGRectGetMaxY(self.baseRect)) {
+        return YES;
+    }
+    
+    if (clearRect.size.height < minSize.height) {
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (void)pinchGesture:(UIPinchGestureRecognizer *)sender {
+    CGFloat newScale = self.currentScale * sender.scale;
+    CGRect oldImageFrame = self.imageView.frame;
+    CGSize newSize = CGSizeMake(newScale * self.baseRect.size.width,
+                                newScale * self.baseRect.size.height);
+    
+    CGRect newFrame = self.imageView.frame;
+    newFrame.size = newSize;
+    self.imageView.frame = newFrame;
+
+    CGPoint d = CGPointMake((oldImageFrame.size.width - newFrame.size.width) / 2.0f,
+                            (oldImageFrame.size.height - newFrame.size.height) / 2.0f);
+    self.imageView.center = CGPointMake(self.imageView.center.x + d.x,
+                                        self.imageView.center.y + d.y);
+    
+    if (([self shouldRevertX] || [self shouldRevertY])) {
+        self.imageView.frame = oldImageFrame;
+    } else {
+        self.currentScale = newScale;
+    }
+    sender.scale = 1;
+}
+
+- (X_OverlayViewPanningMode)getOverlayViewPanningModeByPoint:(CGPoint)point {
+    if (CGRectContainsPoint(self.overlayView.topLeftCorner, point)) {
+        return (OverlayViewPanningModeLeft | OverlayViewPanningModeTop);
+    } else if (CGRectContainsPoint(self.overlayView.topRightCorner, point)) {
+        return (OverlayViewPanningModeRight | OverlayViewPanningModeTop);
+    } else if (CGRectContainsPoint(self.overlayView.bottomLeftCorner, point)) {
+        return (OverlayViewPanningModeLeft | OverlayViewPanningModeBottom);
+    } else if (CGRectContainsPoint(self.overlayView.bottomRightCorner, point)) {
+        return (OverlayViewPanningModeRight | OverlayViewPanningModeBottom);
+    } else if (CGRectContainsPoint(self.overlayView.topEdgeRect, point)) {
+        return OverlayViewPanningModeTop;
+    } else if (CGRectContainsPoint(self.overlayView.rightEdgeRect, point)) {
+        return OverlayViewPanningModeRight;
+    } else if (CGRectContainsPoint(self.overlayView.bottomEdgeRect, point)) {
+        return OverlayViewPanningModeBottom;
+    } else if (CGRectContainsPoint(self.overlayView.leftEdgeRect, point)) {
+        return OverlayViewPanningModeLeft;
+    }
+    
+    return OverlayViewPanningModeNone;
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [super touchesBegan:touches withEvent:event];
+    
+    if ([touches count] == 1) {
+        self.firstTouchedPoint = [(UITouch*)[touches anyObject] locationInView:self];
+    }
+}
+
+- (void)panGesture:(UIPanGestureRecognizer *)sender {
+    if (sender.state == UIGestureRecognizerStateBegan) {
+        CGPoint point = self.firstTouchedPoint;
+        
+        if ([self.overlayView isCornerContainsPoint:point] || [self.overlayView isEdgeContainsPoint:point]) {
+            self.isPanningOverlayView = YES;
+            self.OverlayViewPanningMode = [self getOverlayViewPanningModeByPoint:point];
+        } else {
+            self.isPanningOverlayView = NO;
+        }
+    }
+    
+    if (self.isPanningOverlayView) {
+        [self panOverlayView:sender];
+    } else {
+        [self panImage:sender];
+    }
+
+    [sender setTranslation:CGPointZero inView:self];
+}
+
+- (void)panOverlayView:(UIPanGestureRecognizer *)sender {
+    CGPoint d = [sender translationInView:self];
+    CGRect oldClearRect = self.overlayView.clearRect;
+    CGRect newClearRect = self.overlayView.clearRect;
+    
+    if (self.OverlayViewPanningMode & OverlayViewPanningModeLeft) {
+        newClearRect.origin.x += d.x;
+        newClearRect.size.width -= d.x;
+    } else if (self.OverlayViewPanningMode & OverlayViewPanningModeRight) {
+        newClearRect.size.width += d.x;
+    }
+    
+    if (self.OverlayViewPanningMode & OverlayViewPanningModeTop) {
+        newClearRect.origin.y += d.y;
+        newClearRect.size.height -= d.y;
+    } else if (self.OverlayViewPanningMode & OverlayViewPanningModeBottom) {
+        newClearRect.size.height += d.y;
+    }
+    
+    self.overlayView.clearRect = newClearRect;
+    
+    if ([self shouldRevertX]) {
+        newClearRect.origin.x = oldClearRect.origin.x;
+        newClearRect.size.width = oldClearRect.size.width;
+    }
+
+    if ([self shouldRevertY]) {
+        newClearRect.origin.y = oldClearRect.origin.y;
+        newClearRect.size.height = oldClearRect.size.height;
+    }
+    
+    self.overlayView.clearRect = newClearRect;
+    [self.overlayView setNeedsDisplay];
+}
+
+- (void)panImage:(UIPanGestureRecognizer *)sender {
+    CGPoint d = [sender translationInView:self];
+    CGPoint newCenter = CGPointMake(self.imageView.center.x + d.x,
+                                    self.imageView.center.y + d.y);
+    self.imageView.center = newCenter;
+    
+    if ([self shouldRevertX]) {
+        newCenter.x -= d.x;
+    }
+
+    if ([self shouldRevertY]) {
+        newCenter.y -= d.y;
+    }
+    
+    self.imageView.center = newCenter;
+}
+
+@end

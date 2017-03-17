@@ -1,0 +1,17 @@
+//
+//  UIActionSheet+XBlock.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/22.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+typedef void(^completeBlock) (NSInteger buttonIndex);
+
+@interface UIActionSheet (XBlock) <UIActionSheetDelegate>
+
+- (void)showActionSheetViewWithCompleteBlock:(completeBlock) block;
+
+@end

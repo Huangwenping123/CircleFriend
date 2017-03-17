@@ -1,0 +1,33 @@
+//
+//  X_PhotoCropVC.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+#import "X_PhotoDealBaseVC.h"
+
+#import "LegendFileManager.h"
+#import "LegendCacheManager.h"
+#import "LegendChatViewController.h"
+
+
+typedef void (^X_PhotoCropBlock)(UIImage *targetImg);
+
+
+@interface X_PhotoCropVC : X_PhotoDealBaseVC
+@property (assign,nonatomic) BOOL isDelayMsg;
+@property (assign,nonatomic) BOOL isRemindMsg;
+@property (assign,nonatomic) long long target;//消息发送对象
+@property (strong,nonatomic) NSMutableArray *quietlys; //私聊对象
+@property (assign,nonatomic) ACTIVE_TYPE active;//消息类型
+
+@property(assign,nonatomic)UIImageView *imgData;
+
+- (instancetype)initWithImage:(UIImage *)originImg
+                        block:(X_PhotoCropBlock)block;
+
+@end

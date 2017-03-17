@@ -1,0 +1,44 @@
+//
+//  X_ImageCropperView.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/22.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface X_CropView : UIView
+
+@end
+
+@interface X_PhotoView : UIView
+
+@property (strong, nonatomic) UIImageView *imageView;
+@property (strong, nonatomic) UIImage *image;
+
+@end
+
+@protocol X_CropViewDelegate <NSObject>
+
+- (void)cropMoved:(X_CropView *)cropView;
+
+- (void)cropEnded:(X_CropView *)cropView;
+
+@end
+
+@interface X_PhotoCropperView : UIView
+
+@property (strong, nonatomic) X_PhotoView *photoView;
+@property (strong, nonatomic) X_CropView *cropView;
+
+- (instancetype)initWithFrame:(CGRect)frame image:(UIImage *)image;
+
+/**
+ *  获取裁剪图片
+ *
+ *  @return
+ */
+- (UIImage *)getCroppedImage;
+
+@end

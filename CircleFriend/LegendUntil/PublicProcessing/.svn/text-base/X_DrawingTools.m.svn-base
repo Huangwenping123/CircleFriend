@@ -1,0 +1,220 @@
+//
+//  X_DrawingTools.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_DrawingTools.h"
+
+CGPoint midPoint(CGPoint p1, CGPoint p2) {
+    return CGPointMake((p1.x + p2.x) * 0.5, (p1.y + p2.y) * 0.5);
+}
+
+#pragma mark - X_DrawingPenTool
+
+@implementation X_DrawingPenTool
+
+@synthesize lineColor = _lineColor;
+
+- (id)init {
+    self = [super init];
+    if (self != nil) {
+        self.lineCapStyle = kCGLineCapRound;
+        path = CGPathCreateMutable();
+    }
+    return self;
+}
+
+- (void)setInitialPoint:(CGPoint)firstPoint {
+    
+}
+
+- (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    
+}
+
+- (CGRect)addPathPreviousPreviousPoint:(CGPoint)p2Point
+                     withPreviousPoint:(CGPoint)p1Point
+                      withCurrentPoint:(CGPoint)cpoint {
+    
+    CGPoint mid1 = midPoint(p1Point, p2Point);
+    CGPoint mid2 = midPoint(cpoint, p1Point);
+    CGMutablePathRef subpath = CGPathCreateMutable();
+    CGPathMoveToPoint(subpath, NULL, mid1.x, mid1.y);
+    CGPathAddQuadCurveToPoint(subpath, NULL, p1Point.x, p1Point.y, mid2.x, mid2.y);
+    CGRect bounds = CGPathGetBoundingBox(subpath);
+    
+    CGPathAddPath(path, NULL, subpath);
+    CGPathRelease(subpath);
+    
+    return bounds;
+}
+
+- (void)draw {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextAddPath(context, path);
+    CGContextSetLineCap(context, kCGLineCapRound);
+    CGContextSetLineWidth(context, self.lineWidth);
+    CGContextSetStrokeColorWithColor(context, self.lineColor.CGColor);
+    CGContextSetBlendMode(context, kCGBlendModeNormal);
+    CGContextStrokePath(context);
+}
+
+- (void)dealloc {
+    CGPathRelease(path);
+    self.lineColor = nil;
+}
+
+@end
+
+
+
+@interface X_DrawingLineTool ()
+@property (nonatomic, assign) CGPoint firstPoint;
+@property (nonatomic, assign) CGPoint lastPoint;
+@end
+
+
+@implementation X_DrawingLineTool
+
+@synthesize lineColor = _lineColor;
+@synthesize lineWidth = _lineWidth;
+
+- (void)setInitialPoint:(CGPoint)firstPoint {
+    self.firstPoint = firstPoint;
+}
+
+- (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    self.lastPoint = endPoint;
+}
+
+- (void)draw {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextSetStrokeColorWithColor(context, self.lineColor.CGColor);
+    CGContextSetLineCap(context, kCGLineCapRound);
+    CGContextSetLineWidth(context, self.lineWidth);
+    
+    CGContextMoveToPoint(context, self.firstPoint.x, self.firstPoint.y);
+    CGContextAddLineToPoint(context, self.lastPoint.x, self.lastPoint.y);
+    CGContextStrokePath(context);
+}
+
+- (void)dealloc {
+    self.lineColor = nil;
+}
+
+@end
+
+
+@interface X_DrawingLineArrowTool ()
+@property (nonatomic, assign) CGPoint firstPoint;
+@property (nonatomic, assign) CGPoint lastPoint;
+@end
+
+
+@implementation X_DrawingLineArrowTool
+
+@synthesize lineColor = _lineColor;
+@synthesize lineWidth = _lineWidth;
+
+- (void)setInitialPoint:(CGPoint)firstPoint {
+    self.firstPoint = firstPoint;
+}
+
+- (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    self.lastPoint = endPoint;
+}
+
+- (void)draw {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextSetStrokeColorWithColor(context, self.lineColor.CGColor);
+    CGContextSetLineCap(context, kCGLineCapRound);
+    CGContextSetLineWidth(context, self.lineWidth);
+    
+    CGContextMoveToPoint(context, self.firstPoint.x, self.firstPoint.y);
+    CGContextAddLineToPoint(context, self.lastPoint.x, self.lastPoint.y);
+    CGContextStrokePath(context);
+    
+    //要计算弧度以及剩下的2个点的位置，有点麻烦啊，另外如果一开始就吧箭头添加上去，拖动箭头位置怎么改变？
+}
+
+- (void)dealloc {
+    self.lineColor = nil;
+}
+
+@end
+
+
+@interface X_DrawingRectangleTool ()
+@property (nonatomic, assign) CGPoint firstPoint;
+@property (nonatomic, assign) CGPoint lastPoint;
+@end
+
+
+@implementation X_DrawingRectangleTool
+
+@synthesize lineColor = _lineColor;
+@synthesize lineWidth = _lineWidth;
+
+- (void)setInitialPoint:(CGPoint)firstPoint {
+    self.firstPoint = firstPoint;
+}
+
+- (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    self.lastPoint = endPoint;
+}
+
+- (void)draw {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGRect rectToFill = CGRectMake(self.firstPoint.x, self.firstPoint.y, self.lastPoint.x - self.firstPoint.x, self.lastPoint.y - self.firstPoint.y);
+    CGContextSetStrokeColorWithColor(context, self.lineColor.CGColor);
+    CGContextSetLineWidth(context, self.lineWidth);
+    CGContextStrokeRect(UIGraphicsGetCurrentContext(), rectToFill);
+}
+
+- (void)dealloc {
+    self.lineColor = nil;
+}
+
+@end
+
+
+@interface X_DrawingEllipseTool ()
+@property (nonatomic, assign) CGPoint firstPoint;
+@property (nonatomic, assign) CGPoint lastPoint;
+@end
+
+
+@implementation X_DrawingEllipseTool
+
+@synthesize lineColor = _lineColor;
+@synthesize lineWidth = _lineWidth;
+
+- (void)setInitialPoint:(CGPoint)firstPoint {
+    self.firstPoint = firstPoint;
+}
+
+- (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    self.lastPoint = endPoint;
+}
+
+- (void)draw {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGRect rectToFill = CGRectMake(self.firstPoint.x, self.firstPoint.y, self.lastPoint.x - self.firstPoint.x, self.lastPoint.y - self.firstPoint.y);
+    CGContextSetStrokeColorWithColor(context, self.lineColor.CGColor);
+    CGContextSetLineWidth(context, self.lineWidth);
+    CGContextStrokeEllipseInRect(UIGraphicsGetCurrentContext(), rectToFill);
+}
+
+- (void)dealloc {
+    self.lineColor = nil;
+}
+
+@end

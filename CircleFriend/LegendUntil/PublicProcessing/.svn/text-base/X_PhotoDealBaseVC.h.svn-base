@@ -1,0 +1,13 @@
+//
+//  X_PhotoDealBaseVC.h
+//  图像处理
+//
+//  Created by xiongyw on 15/4/24.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface X_PhotoDealBaseVC : UIViewController
+
+@end

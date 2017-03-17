@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface LegendCircleFriendVC : UITableViewController
-
+//@property (nonatomic, strong) NSArray *dataArray;
 @end

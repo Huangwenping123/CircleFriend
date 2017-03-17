@@ -1,0 +1,268 @@
+//
+//  X_DrawingView.m
+//  图像处理
+//
+//  Created by xiongyw on 15/4/23.
+//  Copyright (c) 2015年 dx. All rights reserved.
+//
+
+#import "X_DrawingView.h"
+
+#import "X_DrawingTools.h"
+
+#define kDefaultLineColor       [UIColor blackColor]
+#define kDefaultLineWidth       5.0f;
+
+@interface X_DrawingView () {
+    CGPoint currentPoint;
+    CGPoint previousPoint1;
+    CGPoint previousPoint2;
+}
+
+@property (nonatomic, strong) NSMutableArray *pathArray;
+@property (nonatomic, strong) NSMutableArray *bufferArray;
+@property (nonatomic, strong) id<X_DrawingTool> currentTool;
+@property (nonatomic, strong) UIImage *image;
+@end
+
+@implementation X_DrawingView
+
+- (id)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self configure];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self configure];
+    }
+    return self;
+}
+
+- (void)configure {
+    
+    self.pathArray = [NSMutableArray new];
+    self.bufferArray = [NSMutableArray new];
+    
+    
+    self.lineColor = kDefaultLineColor;
+    self.lineWidth = kDefaultLineWidth;
+    
+    
+    self.backgroundColor = [UIColor clearColor];
+}
+
+
+#pragma mark - Drawing
+
+- (void)drawRect:(CGRect)rect {
+    [self.image drawInRect:self.bounds];
+    [self.currentTool draw];
+}
+
+- (void)updateCacheImage:(BOOL)redraw {
+    
+    UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0.0);
+    
+    if (redraw) {
+        self.image = nil;
+        
+        [[self.prev_image copy] drawInRect:self.bounds];
+        
+        for (id<X_DrawingTool> tool in self.pathArray) {
+            [tool draw];
+        }
+        
+    } else {
+        [self.image drawAtPoint:CGPointZero];
+        [self.currentTool draw];
+    }
+    
+    self.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+}
+
+- (void)finishDrawing {
+    [self updateCacheImage:NO];
+    
+    [self.bufferArray removeAllObjects];
+    
+    if ([self.delegate respondsToSelector:@selector(drawingView:didEndDrawUsingTool:)]) {
+        [self.delegate drawingView:self didEndDrawUsingTool:self.currentTool];
+    }
+    
+    self.currentTool = nil;
+}
+
+
+- (id<X_DrawingTool>)toolWithCurrentSettings {
+    
+    switch (self.drawTool) {
+        case X_DrawingToolTypePen: {
+            return [X_DrawingPenTool new];
+        }
+        case X_DrawingToolTypeLine: {
+            return [X_DrawingLineTool new];
+        }
+        case X_DrawingToolTypeRectagleStroke: {
+            return [X_DrawingRectangleTool new];
+        }
+        case X_DrawingToolTypeEllipseStroke: {
+            return [X_DrawingEllipseTool new];
+        }
+    }
+}
+
+
+#pragma mark - Touch Methods
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    previousPoint1 = [touch previousLocationInView:self];
+    currentPoint = [touch locationInView:self];
+    
+    self.currentTool = [self toolWithCurrentSettings];
+    self.currentTool.lineWidth = self.lineWidth;
+    self.currentTool.lineColor = self.lineColor;
+    
+    [self.pathArray addObject:self.currentTool];
+    
+    [self.currentTool setInitialPoint:currentPoint];
+    
+    if ([self.delegate respondsToSelector:@selector(drawingView:willBeginDrawUsingTool:)]) {
+        [self.delegate drawingView:self willBeginDrawUsingTool:self.currentTool];
+    }
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    
+    previousPoint2 = previousPoint1;
+    previousPoint1 = [touch previousLocationInView:self];
+    currentPoint = [touch locationInView:self];
+    
+    if ([self.currentTool isKindOfClass:[X_DrawingPenTool class]]) {
+        CGRect bounds = [(X_DrawingPenTool *)self.currentTool addPathPreviousPreviousPoint:previousPoint2
+                                                                         withPreviousPoint:previousPoint1
+                                                                          withCurrentPoint:currentPoint];
+        
+        CGRect drawBox = bounds;
+        drawBox.origin.x -= self.lineWidth * 2.0;
+        drawBox.origin.y -= self.lineWidth * 2.0;
+        drawBox.size.width += self.lineWidth * 4.0;
+        drawBox.size.height += self.lineWidth * 4.0;
+        
+        [self setNeedsDisplayInRect:drawBox];
+    }
+    else {
+        [self.currentTool moveFromPoint:previousPoint1
+                                toPoint:currentPoint];
+        [self setNeedsDisplay];
+    }
+    
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    [self touchesMoved:touches withEvent:event];
+    
+    [self finishDrawing];
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self touchesEnded:touches withEvent:event];
+}
+
+#pragma mark - Load Image
+
+- (void)loadImage:(UIImage *)image {
+    self.image = image;
+    
+    self.prev_image = [image copy];
+    
+    [self.bufferArray removeAllObjects];
+    [self.pathArray removeAllObjects];
+    [self updateCacheImage:YES];
+    [self setNeedsDisplay];
+}
+
+- (void)loadImageData:(NSData *)imageData {
+    CGFloat imageScale;
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+        imageScale = [[UIScreen mainScreen] scale];
+        
+    } else {
+        imageScale = 1.0;
+    }
+    
+    UIImage *image = [UIImage imageWithData:imageData scale:imageScale];
+    [self loadImage:image];
+}
+
+- (void)resetTool {
+    
+    self.currentTool = nil;
+}
+
+#pragma mark - Actions
+
+- (void)clear {
+    [self resetTool];
+    [self.bufferArray removeAllObjects];
+    [self.pathArray removeAllObjects];
+    self.prev_image = nil;
+    [self updateCacheImage:YES];
+    [self setNeedsDisplay];
+}
+
+
+#pragma mark - Undo / Redo
+
+- (NSUInteger)undoSteps {
+    return self.bufferArray.count;
+}
+
+- (BOOL)canUndo {
+    return self.pathArray.count > 0;
+}
+
+- (void)undoLastStep {
+    if ([self canUndo]) {
+        [self resetTool];
+        id<X_DrawingTool>tool = [self.pathArray lastObject];
+        [self.bufferArray addObject:tool];
+        [self.pathArray removeLastObject];
+        [self updateCacheImage:YES];
+        [self setNeedsDisplay];
+    }
+}
+
+- (BOOL)canRedo {
+    return self.bufferArray.count > 0;
+}
+
+- (void)redoLastStep {
+    if ([self canRedo]) {
+        [self resetTool];
+        id<X_DrawingTool>tool = [self.bufferArray lastObject];
+        [self.pathArray addObject:tool];
+        [self.bufferArray removeLastObject];
+        [self updateCacheImage:YES];
+        [self setNeedsDisplay];
+    }
+}
+
+- (void)dealloc {
+    self.pathArray = nil;
+    self.bufferArray = nil;
+    self.currentTool = nil;
+    self.image = nil;
+    self.prev_image = nil;
+    
+}
+
+@end
